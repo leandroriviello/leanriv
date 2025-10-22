@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LeanRiv
 
-## Getting Started
+LeanRiv es un panel privado para crear y administrar redirecciones cortas bajo tu propio dominio.
 
-First, run the development server:
+## Características principales
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Autenticación con credenciales fijas definidas en variables de entorno.
+- Dashboard en modo oscuro con búsqueda en tiempo real (debounce) sobre alias y URL.
+- Creación, listado y eliminación de links almacenados en PostgreSQL vía Prisma.
+- Redirección inmediata desde `/<alias>` al destino configurado.
+- UI moderna con Tailwind CSS, iconos de lucide-react y toasts de feedback.
+
+## Requisitos previos
+
+- Node.js 20+
+- Base de datos PostgreSQL (por ejemplo, Railway)
+
+## Configuración
+
+1. Copiá el archivo de ejemplo y completá tus datos reales:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Editá `.env` con tus credenciales y URL de la base de datos.
+
+   ```dotenv
+   DATABASE_URL=postgresql://user:password@host:port/dbname
+   ADMIN_EMAIL=leanriv@example.com
+   ADMIN_PASSWORD=claveSegura123
+   SESSION_SECRET=una_clave_aleatoria_segura
+   ```
+
+3. Instalá dependencias y generá el cliente de Prisma:
+
+   ```bash
+   npm install
+   npx prisma generate
+   ```
+
+4. Aplicá las migraciones (crearás la tabla `Link`):
+
+   ```bash
+   npx prisma migrate dev --name init
+   ```
+
+## Scripts útiles
+
+| Comando | Descripción |
+| ------- | ----------- |
+| `npm run dev` | Inicia el entorno de desarrollo en `http://localhost:3000`. |
+| `npm run build` | Genera la versión optimizada para producción. |
+| `npm run start` | Sirve la build de producción. |
+| `npm run lint` | Ejecuta ESLint sobre el proyecto. |
+
+## Deploy en Railway
+
+1. Creá un proyecto en Railway con una base de datos PostgreSQL.
+2. Copiá la `DATABASE_URL` brindada por Railway en tu `.env`.
+3. Ejecutá las migraciones en el servidor:
+
+   ```bash
+   npx prisma migrate deploy
+   ```
+
+4. Deployá desde tu repositorio:
+
+   ```bash
+   git push railway main
+   ```
+
+## Stack
+
+- Next.js 16 (App Router, TypeScript)
+- Tailwind CSS 4 (modo oscuro por defecto)
+- Prisma ORM + PostgreSQL
+- jose para sesiones con JWT
+- react-hot-toast para notificaciones
+
+## Estructura relevante
+
+```
+app/
+  login/
+  dashboard/
+  [alias]/
+  api/
+components/
+lib/
+prisma/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+¡Listo! Con esto ya podés gestionar tus enlaces personales bajo tu dominio.
