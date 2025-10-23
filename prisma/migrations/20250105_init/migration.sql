@@ -1,0 +1,7 @@
+-- CreateTable
+CREATE TABLE "Link" (
+    "id" SERIAL PRIMARY KEY,
+    "alias" TEXT NOT NULL UNIQUE,
+    "url" TEXT NOT NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
