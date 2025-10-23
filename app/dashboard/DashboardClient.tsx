@@ -232,7 +232,7 @@ export default function DashboardClient({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90 whitespace-nowrap"
+                className="flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-semibold text-background transition hover:opacity-80 whitespace-nowrap"
               >
                 <Plus className="h-4 w-4" />
                 Nuevo link

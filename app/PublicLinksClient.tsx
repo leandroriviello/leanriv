@@ -92,7 +92,7 @@ export default function PublicLinksClient({
                   </div>
                   <a
                     href={`${baseUrl}/${link.alias}`}
-                    className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-black transition hover:opacity-90 whitespace-nowrap"
+                    className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-background transition hover:opacity-80 whitespace-nowrap"
                   >
                     Ir al link
                   </a>

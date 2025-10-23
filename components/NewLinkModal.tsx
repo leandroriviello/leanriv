@@ -171,7 +171,7 @@ export default function NewLinkModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-2xl bg-accent px-4 py-2.5 text-sm font-semibold text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-2xl bg-accent px-4 py-2.5 text-sm font-semibold text-background transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? "Guardando..." : "Crear link"}
             </button>
