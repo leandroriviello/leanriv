@@ -180,12 +180,7 @@ export default function DashboardClient({
       <NewLinkModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onCreate={async (data) => {
-          const ok = await handleCreateLink(data);
-          if (ok) {
-            setIsModalOpen(false);
-          }
-        }}
+        onCreate={(data) => handleCreateLink(data)}
       />
     </div>
   );
