@@ -25,7 +25,8 @@ export function getAdminCredentials() {
 }
 
 export async function getSession(): Promise<SessionPayload | null> {
-  const token = cookies().get(sessionCookieName)?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get(sessionCookieName)?.value;
   return verifySessionToken(token);
 }
 
