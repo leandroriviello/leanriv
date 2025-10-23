@@ -71,6 +71,8 @@ export default function EditLinkModal({
     event.preventDefault();
     if (isSubmitting) return;
 
+    if (!link) return;
+
     const payload: EditLinkPayload = {
       id: link.id,
       title: title.trim(),
