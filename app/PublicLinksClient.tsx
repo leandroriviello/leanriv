@@ -54,7 +54,7 @@ export default function PublicLinksClient({
     if (!debouncedTerm) return links;
 
     return links.filter((link) => {
-      const haystack = `${link.title} ${link.alias} ${link.url}`.toLowerCase();
+      const haystack = `${link.title ?? ""} ${link.alias ?? ""} ${link.url ?? ""}`.toLowerCase();
       return haystack.includes(debouncedTerm);
     });
   }, [links, debouncedTerm]);
@@ -92,7 +92,9 @@ export default function PublicLinksClient({
                   </div>
                   <a
                     href={`${baseUrl}/${link.alias}`}
-                    className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-background transition hover:opacity-80 whitespace-nowrap"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-foreground transition hover:opacity-80 whitespace-nowrap"
                   >
                     Ir al link
                   </a>

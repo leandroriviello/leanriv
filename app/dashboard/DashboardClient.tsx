@@ -48,7 +48,7 @@ export default function DashboardClient({
     if (!debouncedTerm) return links;
 
     return links.filter((link) => {
-      const haystack = `${link.title} ${link.alias} ${link.url}`.toLowerCase();
+      const haystack = `${link.title ?? ""} ${link.alias ?? ""} ${link.url ?? ""}`.toLowerCase();
       return haystack.includes(debouncedTerm);
     });
   }, [links, debouncedTerm]);
@@ -232,7 +232,7 @@ export default function DashboardClient({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-semibold text-background transition hover:opacity-80 whitespace-nowrap"
+                className="flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-semibold text-foreground transition hover:opacity-80 whitespace-nowrap"
               >
                 <Plus className="h-4 w-4" />
                 Nuevo link
