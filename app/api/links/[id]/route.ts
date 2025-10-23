@@ -3,21 +3,26 @@ import prisma from "@/lib/prisma";
 import { getSessionFromRequest } from "@/lib/auth";
 import { Prisma } from "@prisma/client";
 
-type Params = {
-  params: {
+type RouteContext = {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
-export async function DELETE(request: NextRequest, { params }: Params) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
   const session = await getSessionFromRequest(request);
   if (!session) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const id = Number(params.id);
+  const { id: idParam } = await context.params;
+  const id = Number(idParam);
+
   if (Number.isNaN(id)) {
-    return NextResponse.json({ error: "Identificador inválido" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Identificador inválido" },
+      { status: 400 },
+    );
   }
 
   try {
