@@ -27,6 +27,8 @@ export default function DashboardClient({
   const [debouncedTerm, setDebouncedTerm] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [baseUrl, setBaseUrl] = useState<string>("https://leanriv.com");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -111,7 +113,7 @@ export default function DashboardClient({
 
   async function handleCopyLink(alias: string) {
     try {
-      const url = `${window.location.origin}/${alias}`;
+      const url = `${baseUrl}/${alias}`;
       await navigator.clipboard.writeText(url);
       toast.success("Copiado al portapapeles");
     } catch {
@@ -130,25 +132,54 @@ export default function DashboardClient({
     }
   }
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setBaseUrl(window.location.origin);
+    }
+  }, []);
+
+  useEffect(() => {
+    async function fetchLinks() {
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/links", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("No pudimos cargar los links");
+        }
+
+        const data = await response.json();
+        if (Array.isArray(data?.links)) {
+          setLinks(data.links);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("No pudimos sincronizar los links");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchLinks();
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-6 py-10 lg:px-10">
-        <header className="flex flex-col gap-6 rounded-3xl border border-border bg-card/80 p-6 shadow-[0_30px_80px_-50px_rgba(166,255,0,0.5)] sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.3em] text-muted">
-              Tu panel
-            </p>
-            <h1 className="text-2xl font-semibold text-foreground">
-              LeanRiv Dashboard
+    <div className="min-h-screen bg-[#0a0a0a]">
+      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12">
+        <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+              LeanRiv
             </h1>
-            <p className="text-sm text-muted">{userEmail}</p>
+            <p className="text-sm text-muted">
+              Accedé a tus redirecciones rápidas. Sesión: {userEmail}
+            </p>
           </div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <SearchBar
-              value={searchTerm}
-              onChange={setSearchTerm}
-              placeholder="Buscar alias o URL…"
-            />
+            <SearchBar value={searchTerm} onChange={setSearchTerm} />
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -168,9 +199,13 @@ export default function DashboardClient({
           </div>
         </header>
 
-        <main className="flex-1 rounded-3xl border border-border bg-card/80 p-6 shadow-[0_40px_120px_-70px_rgba(166,255,0,0.45)]">
+        <main className="flex-1">
+          <div className="mb-4 text-xs uppercase tracking-[0.3em] text-muted">
+            {isLoading ? "Sincronizando..." : "Tus links"}
+          </div>
           <LinkTable
             links={filteredLinks}
+            baseUrl={baseUrl}
             onDelete={handleDeleteLink}
             onCopy={handleCopyLink}
           />

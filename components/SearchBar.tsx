@@ -11,7 +11,7 @@ type SearchBarProps = {
 export default function SearchBar({
   value,
   onChange,
-  placeholder = "Buscar…",
+  placeholder = "Buscar links...",
 }: SearchBarProps) {
   return (
     <div className="relative flex w-full min-w-[240px] items-center">

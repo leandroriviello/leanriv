@@ -11,17 +11,20 @@ export type LinkRow = {
 
 type LinkTableProps = {
   links: LinkRow[];
+  baseUrl: string;
   onDelete: (id: number) => void;
   onCopy: (alias: string) => void;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("es-AR", {
-  dateStyle: "medium",
-  timeStyle: "short",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
 });
 
 export default function LinkTable({
   links,
+  baseUrl,
   onDelete,
   onCopy,
 }: LinkTableProps) {
@@ -39,7 +42,7 @@ export default function LinkTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/70">
+    <div className="overflow-hidden rounded-2xl border border-border/70 bg-[#0f0f10]">
       <table className="min-w-full border-collapse text-sm">
         <thead className="bg-[#131313] text-left text-xs uppercase tracking-wider text-muted">
           <tr>
@@ -53,10 +56,18 @@ export default function LinkTable({
           {links.map((link) => (
             <tr
               key={link.id}
-              className="border-t border-border/60 transition hover:bg-[#171717]"
+              className="border-t border-border/60 transition hover:bg-[#161616]"
             >
               <td className="px-4 py-3 font-semibold text-foreground">
-                /{link.alias}
+                <a
+                  href={`${baseUrl}/${link.alias}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-accent transition hover:opacity-80"
+                  title={`${baseUrl}/${link.alias}`}
+                >
+                  {baseUrl.replace(/^https?:\/\//, "")}/{link.alias}
+                </a>
               </td>
               <td className="px-4 py-3">
                 <a
@@ -64,6 +75,7 @@ export default function LinkTable({
                   target="_blank"
                   rel="noreferrer"
                   className="line-clamp-1 text-sm text-accent transition hover:underline"
+                  title={link.url}
                 >
                   {link.url}
                 </a>
