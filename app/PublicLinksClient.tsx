@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import SearchBar from "@/components/SearchBar";
-import LinkTable, { type LinkRow } from "@/components/LinkTable";
+import type { LinkRow } from "@/components/LinkTable";
 
 export type PublicLink = LinkRow;
 
@@ -36,7 +36,11 @@ export default function PublicLinksClient({
         if (!response.ok) return;
         const data = await response.json();
         if (Array.isArray(data?.links)) {
-          setLinks(data.links);
+          setLinks(
+            [...data.links].sort((a, b) =>
+              a.title.localeCompare(b.title, "es", { sensitivity: "base" }),
+            ),
+          );
         }
       } finally {
         setIsSyncing(false);
@@ -50,32 +54,53 @@ export default function PublicLinksClient({
     if (!debouncedTerm) return links;
 
     return links.filter((link) => {
-      const haystack = `${link.alias} ${link.url}`.toLowerCase();
+      const haystack = `${link.title} ${link.alias} ${link.url}`.toLowerCase();
       return haystack.includes(debouncedTerm);
     });
   }, [links, debouncedTerm]);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
-      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-12">
-        <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-              LeanRiv
-            </h1>
-            <p className="text-sm text-muted">
-              Directorio personal de redirecciones. Explorá y encontrá tu próximo link rápido.
-            </p>
-          </div>
-          <SearchBar value={searchTerm} onChange={setSearchTerm} />
-        </header>
+      <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 px-6 py-12">
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+          Links de interés
+        </h1>
 
-        <main className="flex-1">
-          <div className="mb-4 text-xs uppercase tracking-[0.3em] text-muted">
-            {isSyncing ? "Actualizando..." : "Links públicos"}
+        <div className="flex flex-col gap-6">
+          <SearchBar value={searchTerm} onChange={setSearchTerm} />
+
+          <div className="text-xs uppercase tracking-[0.3em] text-muted">
+            {isSyncing ? "Actualizando..." : `${filteredLinks.length} enlace(s)`}
           </div>
-          <LinkTable links={filteredLinks} baseUrl={baseUrl} />
-        </main>
+
+          <div className="space-y-3">
+            {filteredLinks.length === 0 ? (
+              <div className="rounded-2xl border border-border/70 bg-[#0f0f10] p-6 text-center text-sm text-muted">
+                No encontramos enlaces con ese término.
+              </div>
+            ) : (
+              filteredLinks.map((link) => (
+                <div
+                  key={link.id}
+                  className="flex items-center justify-between gap-4 rounded-2xl border border-border/70 bg-[#0f0f10] px-5 py-4"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-lg font-medium text-foreground">
+                      {link.title}
+                    </p>
+                    <p className="truncate text-xs text-muted">/{link.alias}</p>
+                  </div>
+                  <a
+                    href={`${baseUrl}/${link.alias}`}
+                    className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-black transition hover:opacity-90 whitespace-nowrap"
+                  >
+                    Ir al link
+                  </a>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

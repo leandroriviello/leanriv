@@ -1,11 +1,12 @@
 "use client";
 
-import { Copy, Trash2 } from "lucide-react";
+import { Copy, Trash2, PenSquare } from "lucide-react";
 
 export type LinkRow = {
   id: number;
   alias: string;
   url: string;
+  title: string;
   createdAt: string;
 };
 
@@ -14,6 +15,7 @@ type LinkTableProps = {
   baseUrl: string;
   onDelete?: (id: number) => void;
   onCopy?: (alias: string) => void;
+  onEdit?: (link: LinkRow) => void;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("es-AR", {
@@ -27,8 +29,9 @@ export default function LinkTable({
   baseUrl,
   onDelete,
   onCopy,
+  onEdit,
 }: LinkTableProps) {
-  const actionsEnabled = Boolean(onDelete && onCopy);
+  const actionsEnabled = Boolean(onDelete || onCopy || onEdit);
 
   if (!links.length) {
     return (
@@ -49,6 +52,7 @@ export default function LinkTable({
         <table className="min-w-full border-collapse text-sm">
           <thead className="bg-[#131313] text-left text-xs uppercase tracking-wider text-muted">
             <tr>
+              <th className="px-4 py-3 font-medium">Título</th>
               <th className="px-4 py-3 font-medium">Alias</th>
               <th className="px-4 py-3 font-medium">URL destino</th>
               <th className="px-4 py-3 font-medium whitespace-nowrap">Creado</th>
@@ -65,12 +69,15 @@ export default function LinkTable({
                 key={link.id}
                 className="border-t border-border/60 transition hover:bg-[#161616]"
               >
+                <td className="px-4 py-3 font-medium text-foreground">
+                  {link.title}
+                </td>
                 <td className="px-4 py-3 font-semibold text-foreground">
                   <a
                     href={`${baseUrl}/${link.alias}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="block max-w-xs truncate text-sm text-accent transition hover:opacity-80"
+                    className="block max-w-[200px] truncate text-sm text-accent transition hover:opacity-80"
                     title={`${baseUrl}/${link.alias}`}
                   >
                     {baseUrl.replace(/^https?:\/\//, "")}/{link.alias}
@@ -81,7 +88,7 @@ export default function LinkTable({
                     href={link.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="block max-w-xl truncate text-sm text-accent transition hover:underline"
+                    className="block max-w-[260px] truncate text-sm text-accent transition hover:underline"
                     title={link.url}
                   >
                     {link.url}
@@ -93,20 +100,33 @@ export default function LinkTable({
                 {actionsEnabled ? (
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => onCopy?.(link.alias)}
-                        className="group flex h-9 w-9 items-center justify-center rounded-2xl border border-transparent text-muted transition hover:border-accent hover:text-foreground"
-                        title="Copiar URL corta"
-                      >
-                        <Copy className="h-4 w-4 group-active:scale-95" />
-                      </button>
-                      <button
-                        onClick={() => onDelete?.(link.id)}
-                        className="group flex h-9 w-9 items-center justify-center rounded-2xl border border-border text-muted transition hover:border-[#ff4d4d] hover:text-[#ff8080]"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="h-4 w-4 group-active:scale-95" />
-                      </button>
+                      {onEdit ? (
+                        <button
+                          onClick={() => onEdit(link)}
+                          className="group flex h-9 w-9 items-center justify-center rounded-2xl border border-border text-muted transition hover:border-accent hover:text-foreground"
+                          title="Editar"
+                        >
+                          <PenSquare className="h-4 w-4 group-active:scale-95" />
+                        </button>
+                      ) : null}
+                      {onCopy ? (
+                        <button
+                          onClick={() => onCopy(link.alias)}
+                          className="group flex h-9 w-9 items-center justify-center rounded-2xl border border-transparent text-muted transition hover:border-accent hover:text-foreground"
+                          title="Copiar URL corta"
+                        >
+                          <Copy className="h-4 w-4 group-active:scale-95" />
+                        </button>
+                      ) : null}
+                      {onDelete ? (
+                        <button
+                          onClick={() => onDelete(link.id)}
+                          className="group flex h-9 w-9 items-center justify-center rounded-2xl border border-border text-muted transition hover:border-[#ff4d4d] hover:text-[#ff8080]"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="h-4 w-4 group-active:scale-95" />
+                        </button>
+                      ) : null}
                     </div>
                   </td>
                 ) : null}

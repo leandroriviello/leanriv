@@ -8,6 +8,9 @@ import LinkTable, { type LinkRow } from "@/components/LinkTable";
 import NewLinkModal, {
   type LinkFormData,
 } from "@/components/NewLinkModal";
+import EditLinkModal, {
+  type EditLinkPayload,
+} from "@/components/EditLinkModal";
 import { Plus } from "lucide-react";
 
 export type DashboardLink = LinkRow;
@@ -30,6 +33,8 @@ export default function DashboardClient({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingLink, setEditingLink] = useState<LinkRow | null>(null);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -43,7 +48,7 @@ export default function DashboardClient({
     if (!debouncedTerm) return links;
 
     return links.filter((link) => {
-      const haystack = `${link.alias} ${link.url}`.toLowerCase();
+      const haystack = `${link.title} ${link.alias} ${link.url}`.toLowerCase();
       return haystack.includes(debouncedTerm);
     });
   }, [links, debouncedTerm]);
@@ -74,6 +79,7 @@ export default function DashboardClient({
           id: link.id,
           alias: link.alias,
           url: link.url,
+          title: link.title,
           createdAt: link.createdAt,
         },
         ...prev,
@@ -109,6 +115,54 @@ export default function DashboardClient({
     } catch (error) {
       console.error(error);
       toast.error("Ocurrió un error al eliminar el link.");
+    }
+  }
+
+  function openEdit(link: LinkRow) {
+    setEditingLink(link);
+    setIsEditOpen(true);
+  }
+
+  async function handleUpdateLink(payload: EditLinkPayload) {
+    try {
+      const response = await fetch(`/api/links/${payload.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        const errorMessage =
+          typeof data?.error === "string"
+            ? data.error
+            : Object.values(data?.error ?? {})
+                .flat()
+                .join(". ") || "No pudimos actualizar el link.";
+        toast.error(errorMessage);
+        return false;
+      }
+
+      const { link } = await response.json();
+      setLinks((prev) =>
+        prev.map((item) =>
+          item.id === link.id
+            ? {
+                id: link.id,
+                alias: link.alias,
+                url: link.url,
+                title: link.title,
+                createdAt: link.createdAt,
+              }
+            : item,
+        ),
+      );
+      toast.success("Link actualizado ✅");
+      return true;
+    } catch (error) {
+      console.error(error);
+      toast.error("Ocurrió un error al actualizar el link.");
+      return false;
     }
   }
 
@@ -203,6 +257,7 @@ export default function DashboardClient({
             baseUrl={baseUrl}
             onDelete={handleDeleteLink}
             onCopy={handleCopyLink}
+            onEdit={openEdit}
           />
         </main>
       </div>
@@ -211,6 +266,15 @@ export default function DashboardClient({
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreate={(data) => handleCreateLink(data)}
+      />
+      <EditLinkModal
+        open={isEditOpen}
+        link={editingLink}
+        onClose={() => {
+          setIsEditOpen(false);
+          setEditingLink(null);
+        }}
+        onUpdate={handleUpdateLink}
       />
     </div>
   );

@@ -1,55 +1,58 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import type { LinkRow } from "@/components/LinkTable";
 
-export type LinkFormData = {
+export type EditLinkPayload = {
+  id: number;
   title: string;
   alias: string;
   url: string;
 };
 
-type NewLinkModalProps = {
+type EditLinkModalProps = {
   open: boolean;
+  link: LinkRow | null;
   onClose: () => void;
-  onCreate: (data: LinkFormData) => Promise<boolean>;
+  onUpdate: (data: EditLinkPayload) => Promise<boolean>;
 };
 
-export default function NewLinkModal({
+export default function EditLinkModal({
   open,
+  link,
   onClose,
-  onCreate,
-}: NewLinkModalProps) {
-  const [title, setTitle] = useState("");
-  const [alias, setAlias] = useState("");
-  const [url, setUrl] = useState("");
+  onUpdate,
+}: EditLinkModalProps) {
+  const [title, setTitle] = useState(link?.title ?? "");
+  const [alias, setAlias] = useState(link?.alias ?? "");
+  const [url, setUrl] = useState(link?.url ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  const resetForm = useCallback(() => {
-    setTitle("");
-    setAlias("");
-    setUrl("");
-    setIsSubmitting(false);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    resetForm();
-    onClose();
-  }, [onClose, resetForm]);
-
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setTitle(link?.title ?? "");
+      setAlias(link?.alias ?? "");
+      setUrl(link?.url ?? "");
+    }, 0);
 
     function handleKeydown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        closeModal();
+        onClose();
       }
     }
 
     window.addEventListener("keydown", handleKeydown);
-    return () => window.removeEventListener("keydown", handleKeydown);
-  }, [open, closeModal]);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("keydown", handleKeydown);
+    };
+  }, [open, link, onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -57,32 +60,38 @@ export default function NewLinkModal({
     firstInput?.focus();
   }, [open]);
 
-  if (!open) return null;
+  if (!open || !link) return null;
+
+  function handleClose() {
+    setIsSubmitting(false);
+    onClose();
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (isSubmitting) return;
 
-    const data = {
+    const payload: EditLinkPayload = {
+      id: link.id,
       title: title.trim(),
       alias: alias.trim().toLowerCase(),
       url: url.trim(),
     };
 
-    if (!data.title || !data.alias || !data.url) return;
+    if (!payload.title || !payload.alias || !payload.url) return;
 
     setIsSubmitting(true);
-    const ok = await onCreate(data);
-    if (ok) {
-      closeModal();
-    }
+    const ok = await onUpdate(payload);
     setIsSubmitting(false);
+    if (ok) {
+      handleClose();
+    }
   }
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
-      onClick={closeModal}
+      onClick={handleClose}
     >
       <div
         ref={dialogRef}
@@ -92,15 +101,15 @@ export default function NewLinkModal({
         <div className="mb-4 flex items-start justify-between">
           <div>
             <h2 className="text-lg font-semibold text-foreground">
-              Crear nuevo link
+              Editar link
             </h2>
             <p className="mt-1 text-sm text-muted">
-              Elegí un alias memorable y la URL a la que querés redirigir.
+              Actualizá el título, alias o URL según necesites.
             </p>
           </div>
           <button
             className="rounded-xl border border-transparent p-2 text-muted transition hover:border-border hover:text-foreground"
-            onClick={closeModal}
+            onClick={handleClose}
             aria-label="Cerrar"
           >
             <X className="h-4 w-4" />
@@ -109,15 +118,14 @@ export default function NewLinkModal({
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <label htmlFor="title" className="text-sm font-medium text-muted">
+            <label htmlFor="edit-title" className="text-sm font-medium text-muted">
               Título
             </label>
             <input
-              id="title"
+              id="edit-title"
               name="title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="ej: Documentación IA"
               required
               maxLength={80}
               className="h-11 w-full rounded-2xl border border-border bg-[#0f0f10] px-4 text-sm text-foreground outline-none placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/40"
@@ -125,17 +133,16 @@ export default function NewLinkModal({
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="alias" className="text-sm font-medium text-muted">
+            <label htmlFor="edit-alias" className="text-sm font-medium text-muted">
               Alias
             </label>
             <div className="flex items-center gap-2 rounded-2xl border border-border bg-[#0f0f10] px-4">
               <span className="text-muted">/</span>
               <input
-                id="alias"
+                id="edit-alias"
                 name="alias"
                 value={alias}
                 onChange={(event) => setAlias(event.target.value.toLowerCase())}
-                placeholder="ej: aiwebs"
                 required
                 pattern="[a-z0-9-]+"
                 title="Usá sólo letras minúsculas, números o guiones."
@@ -145,16 +152,15 @@ export default function NewLinkModal({
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="url" className="text-sm font-medium text-muted">
+            <label htmlFor="edit-url" className="text-sm font-medium text-muted">
               URL destino
             </label>
             <input
-              id="url"
+              id="edit-url"
               name="url"
               type="url"
               value={url}
               onChange={(event) => setUrl(event.target.value)}
-              placeholder="https://..."
               required
               className="h-11 w-full rounded-2xl border border-border bg-[#0f0f10] px-4 text-sm text-foreground outline-none placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/40"
             />
@@ -163,7 +169,7 @@ export default function NewLinkModal({
           <div className="flex justify-end gap-3 pt-1">
             <button
               type="button"
-              onClick={closeModal}
+              onClick={handleClose}
               className="rounded-2xl border border-border px-4 py-2.5 text-sm text-muted transition hover:border-accent hover:text-foreground"
             >
               Cancelar
@@ -173,7 +179,7 @@ export default function NewLinkModal({
               disabled={isSubmitting}
               className="rounded-2xl bg-accent px-4 py-2.5 text-sm font-semibold text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmitting ? "Guardando..." : "Crear link"}
+              {isSubmitting ? "Guardando..." : "Guardar cambios"}
             </button>
           </div>
         </form>

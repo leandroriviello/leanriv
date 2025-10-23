@@ -6,13 +6,14 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const links = await prisma.link.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: { title: "asc" },
   });
 
   const serializedLinks: PublicLink[] = links.map((link) => ({
     id: link.id,
     alias: link.alias,
     url: link.url,
+    title: link.title,
     createdAt: link.createdAt.toISOString(),
   }));
 

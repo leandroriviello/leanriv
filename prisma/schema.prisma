@@ -11,5 +11,6 @@ model Link {
   id        Int      @id @default(autoincrement())
   alias     String   @unique
   url       String
+  title     String
   createdAt DateTime @default(now())
 }

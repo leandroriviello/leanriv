@@ -5,6 +5,10 @@ import { getSessionFromRequest } from "@/lib/auth";
 import { Prisma } from "@prisma/client";
 
 const linkSchema = z.object({
+  title: z
+    .string()
+    .min(2, "El título debe tener al menos 2 caracteres")
+    .max(80, "El título no puede superar los 80 caracteres"),
   alias: z
     .string()
     .min(2, "El alias debe tener al menos 2 caracteres")
@@ -41,11 +45,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { alias, url } = parsed.data;
+  const { title, alias, url } = parsed.data;
 
   try {
     const link = await prisma.link.create({
-      data: { alias, url },
+      data: { title, alias, url },
     });
 
     return NextResponse.json({ link }, { status: 201 });

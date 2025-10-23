@@ -20,6 +20,7 @@ export default async function DashboardPage() {
     id: link.id,
     alias: link.alias,
     url: link.url,
+    title: link.title,
     createdAt: link.createdAt.toISOString(),
   }));
 
