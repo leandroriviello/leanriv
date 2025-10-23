@@ -17,12 +17,7 @@ const linkSchema = z.object({
     .url("Debe ser una URL válida"),
 });
 
-export async function GET(request: NextRequest) {
-  const session = await getSessionFromRequest(request);
-  if (!session) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
-
+export async function GET() {
   const links = await prisma.link.findMany({
     orderBy: { createdAt: "desc" },
   });

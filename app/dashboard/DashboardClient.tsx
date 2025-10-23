@@ -15,11 +15,13 @@ export type DashboardLink = LinkRow;
 type DashboardClientProps = {
   initialLinks: DashboardLink[];
   userEmail: string;
+  baseUrl: string;
 };
 
 export default function DashboardClient({
   initialLinks,
   userEmail,
+  baseUrl,
 }: DashboardClientProps) {
   const router = useRouter();
   const [links, setLinks] = useState<LinkRow[]>(initialLinks);
@@ -27,7 +29,6 @@ export default function DashboardClient({
   const [debouncedTerm, setDebouncedTerm] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [baseUrl, setBaseUrl] = useState<string>("https://leanriv.com");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -133,12 +134,6 @@ export default function DashboardClient({
   }
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setBaseUrl(window.location.origin);
-    }
-  }, []);
-
-  useEffect(() => {
     async function fetchLinks() {
       try {
         setIsLoading(true);
@@ -183,7 +178,7 @@ export default function DashboardClient({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="flex items-center gap-2 rounded-2xl bg-accent px-4 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+                className="flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90 whitespace-nowrap"
               >
                 <Plus className="h-4 w-4" />
                 Nuevo link

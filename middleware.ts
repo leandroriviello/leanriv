@@ -27,6 +27,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname.startsWith("/api/links") && request.method === "GET") {
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get(sessionCookieName)?.value;
   const session = await verifySessionToken(token);
 
