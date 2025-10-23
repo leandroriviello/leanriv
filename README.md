@@ -1,29 +1,28 @@
 # LeanRiv
 
-LeanRiv es un panel privado para crear y administrar redirecciones cortas bajo tu propio dominio.
+Gestor personal de enlaces cortos con modo oscuro, pensado para uso privado bajo el dominio `leanriv.com`.
 
-## Características principales
+## 🧠 Qué resuelve
 
-- Autenticación con credenciales fijas definidas en variables de entorno.
-- Dashboard en modo oscuro con búsqueda en tiempo real (debounce) sobre alias y URL.
-- Creación, listado y eliminación de links almacenados en PostgreSQL vía Prisma.
-- Redirección inmediata desde `/<alias>` al destino configurado.
-- UI moderna con Tailwind CSS, iconos de lucide-react y toasts de feedback.
+- Guarda alias cortos (`/aiwebs`) que redirigen a URLs largas.
+- Dashboard minimalista para crear, buscar y eliminar enlaces en segundos.
+- Redirecciones instantáneas al ingresar `https://leanriv.com/<alias>`.
+- Autenticación cerrada con un único usuario configurado por variables de entorno.
 
-## Requisitos previos
+## ⚙️ Requisitos
 
-- Node.js 20+
-- Base de datos PostgreSQL (por ejemplo, Railway)
+- Node.js 20 o superior.
+- Base de datos PostgreSQL (Railway es la opción recomendada).
 
-## Configuración
+## 🚀 Puesta en marcha local
 
-1. Copiá el archivo de ejemplo y completá tus datos reales:
+1. **Configurar variables de entorno**
 
    ```bash
    cp .env.example .env
    ```
 
-2. Editá `.env` con tus credenciales y URL de la base de datos.
+   Editá `.env` con tus credenciales reales:
 
    ```dotenv
    DATABASE_URL=postgresql://user:password@host:port/dbname
@@ -32,53 +31,101 @@ LeanRiv es un panel privado para crear y administrar redirecciones cortas bajo t
    SESSION_SECRET=una_clave_aleatoria_segura
    ```
 
-3. Instalá dependencias y generá el cliente de Prisma:
+2. **Instalar dependencias**
 
    ```bash
    npm install
+   ```
+
+3. **Generar cliente de Prisma**
+
+   ```bash
    npx prisma generate
    ```
 
-4. Aplicá las migraciones (crearás la tabla `Link`):
+4. **Aplicar migraciones**
 
    ```bash
    npx prisma migrate dev --name init
    ```
 
-## Scripts útiles
+5. **Iniciar el servidor**
 
-| Comando | Descripción |
-| ------- | ----------- |
-| `npm run dev` | Inicia el entorno de desarrollo en `http://localhost:3000`. |
-| `npm run build` | Genera la versión optimizada para producción. |
-| `npm run start` | Sirve la build de producción. |
-| `npm run lint` | Ejecuta ESLint sobre el proyecto. |
+   ```bash
+   npm run dev
+   ```
 
-## Deploy en Railway
+   La app quedará disponible en [http://localhost:3000](http://localhost:3000).
 
-1. Creá un proyecto en Railway con una base de datos PostgreSQL.
-2. Copiá la `DATABASE_URL` brindada por Railway en tu `.env`.
-3. Ejecutá las migraciones en el servidor:
+## 🛠 Scripts disponibles
+
+| Comando          | Descripción                                           |
+| ---------------- | ----------------------------------------------------- |
+| `npm run dev`    | Entorno de desarrollo con recarga en caliente.        |
+| `npm run build`  | Compila la aplicación para producción.                |
+| `npm run start`  | Sirve la build de producción.                         |
+| `npm run lint`   | Ejecuta ESLint sobre todo el proyecto.                |
+
+## 💾 Modelo de datos
+
+```prisma
+model Link {
+  id        Int      @id @default(autoincrement())
+  alias     String   @unique
+  url       String
+  createdAt DateTime @default(now())
+}
+```
+
+## 🔐 Autenticación
+
+- Credenciales fijas (`ADMIN_EMAIL` + `ADMIN_PASSWORD`).
+- Sesiones firmadas con JWT (librería `jose`) y cookies HTTP-only.
+- Middleware que protege `/dashboard` y `/api/links`, redirigiendo a `/login`.
+
+## 🌐 Endpoints principales
+
+- `POST /api/auth` → Inicia sesión y setea cookie.
+- `DELETE /api/auth` → Cierra sesión.
+- `GET /api/links` → Devuelve todos los enlaces (requiere sesión).
+- `POST /api/links` → Crea un enlace (requiere sesión).
+- `DELETE /api/links/:id` → Elimina un enlace (requiere sesión).
+- `GET /:alias` → Redirige a la URL original o devuelve 404.
+
+## 🧪 Flow de usuario
+
+1. Ingresá en `/login` con las credenciales configuradas.
+2. Utilizá el buscador con debounce para filtrar por alias/URL.
+3. Creá nuevos enlaces desde el modal `Nuevo link`.
+4. Copiá o eliminá enlaces desde la tabla.
+5. Salí de la sesión desde el botón “Salir”.
+
+## ☁️ Deploy en Railway
+
+1. Creá un proyecto en Railway y añadí un servicio de PostgreSQL.
+2. Copiá la `DATABASE_URL` y colócala en tu `.env`.
+3. Ejecutá las migraciones en Railway:
 
    ```bash
    npx prisma migrate deploy
    ```
 
-4. Deployá desde tu repositorio:
+4. Deployá la app:
 
    ```bash
    git push railway main
    ```
 
-## Stack
+## 🧩 Stack
 
-- Next.js 16 (App Router, TypeScript)
-- Tailwind CSS 4 (modo oscuro por defecto)
-- Prisma ORM + PostgreSQL
-- jose para sesiones con JWT
-- react-hot-toast para notificaciones
+- Next.js 16 (App Router + TypeScript).
+- Tailwind CSS 4 con tema oscuro custom.
+- Prisma ORM + PostgreSQL.
+- `jose` para firmas JWT.
+- `react-hot-toast` para feedback instantáneo.
+- Íconos de `lucide-react`.
 
-## Estructura relevante
+## 📁 Estructura relevante
 
 ```
 app/
@@ -91,4 +138,6 @@ lib/
 prisma/
 ```
 
-¡Listo! Con esto ya podés gestionar tus enlaces personales bajo tu dominio.
+---
+
+Con LeanRiv tenés un repositorio organizado para gestionar tus propios enlaces bajo tu dominio personal, con la velocidad y estética de un dashboard moderno. ¡Listo para usar o extender! 🚀
